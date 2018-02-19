@@ -67,7 +67,8 @@ usage(const char *progname)
 		"  -C:			Append checksum to firmware image\n"
 		"  -s <file>:		Extract signature file from firmware image\n"
 		"  -i <file>:		Extract metadata file from firmware image\n"
-		"  -t:			Remove extracted chunks from firmare image (using -s, -i)\n"
+		"  -c:			Verify checksum from firmware image\n"
+		"  -t:			Remove extracted chunks from firmare image (using -s, -i, -c)\n"
 		"  -q:			Quiet (suppress error messages)\n"
 		"\n", progname);
 	return 1;
@@ -311,6 +312,38 @@ validate_metadata(struct fwimage_header *hdr, int data_len)
 }
 
 static int
+validate_checksum(const char *checksum, int data_len, int file_len, const char *name)
+{
+	ftruncate(fileno(firmware_file), file_len);
+	char buf[1024];
+	char *sum;
+	int ret;
+	snprintf(buf, sizeof(buf), "sha256sum %s", name);
+
+	FILE *fp;
+	fp = popen(buf, "r");
+	if (fp == NULL)
+		return 1;
+
+	while(fgets(buf, sizeof(buf), fp) != NULL) {
+		sum = strtok(buf, " ");
+	}
+	pclose(fp);
+
+	ret = strcmp(checksum, sum);
+	if(ret < 0) {
+		ret = 1;
+	} else if(ret > 0) {
+		ret = 1;
+	} else {
+		ret = 0;
+	}
+//	printf("%s %d\n", checksum, strlen(checksum));
+//	printf("%s %d\n", sum, strlen(sum));
+	return ret;
+}
+
+static int
 extract_data(const char *name)
 {
 	struct fwimage_header *hdr;
@@ -395,6 +428,9 @@ extract_data(const char *name)
 			fwrite(hdr + 1, data_len, 1, metadata_file);
 			ret = 0;
 			break;
+		} else if (tr.type == FWIMAGE_CHECKSUM) {
+			if (validate_checksum(buf, data_len, dbuf.file_len, name))
+				continue;
 		} else {
 			continue;
 		}
@@ -427,7 +463,7 @@ int main(int argc, char **argv)
 
 	crc32_filltable(crc_table);
 
-	while ((ch = getopt(argc, argv, "i:I:qs:S:tC")) != -1) {
+	while ((ch = getopt(argc, argv, "i:I:qs:S:tCc")) != -1) {
 		ret = 0;
 		switch(ch) {
 		case 'S':
@@ -446,6 +482,8 @@ int main(int argc, char **argv)
 		case 'i':
 			ret = set_file(&metadata_file, optarg, MODE_EXTRACT);
 			break;
+		case 'c':
+			file_mode = MODE_EXTRACT;
 		case 't':
 			truncate_file = true;
 			break;
