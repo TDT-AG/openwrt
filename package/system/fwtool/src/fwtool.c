@@ -24,8 +24,9 @@
 
 #define METADATA_MAXLEN		30 * 1024
 #define SIGNATURE_MAXLEN	1 * 1024
+#define CHECKSUM_MAXLEN		1 * 64
 
-#define BUFLEN			(METADATA_MAXLEN + SIGNATURE_MAXLEN + 1024)
+#define BUFLEN	(METADATA_MAXLEN + SIGNATURE_MAXLEN + CHECKSUM_MAXLEN + 1024)
 
 enum {
 	MODE_DEFAULT = -1,
@@ -45,6 +46,8 @@ static int file_mode = MODE_DEFAULT;
 static bool truncate_file;
 static bool quiet = false;
 
+static bool append_checksum;
+
 static uint32_t crc_table[256];
 
 #define msg(...)					\
@@ -61,6 +64,7 @@ usage(const char *progname)
 		"Options:\n"
 		"  -S <file>:		Append signature file to firmware image\n"
 		"  -I <file>:		Append metadata file to firmware image\n"
+		"  -C:			Append checksum to firmware image\n"
 		"  -s <file>:		Extract signature file from firmware image\n"
 		"  -i <file>:		Extract metadata file from firmware image\n"
 		"  -t:			Remove extracted chunks from firmare image (using -s, -i)\n"
@@ -177,6 +181,37 @@ add_signature(struct fwimage_trailer *tr)
 }
 
 static int
+add_checksum(struct fwimage_trailer *tr, const char *name)
+{
+	char buf[1024];
+	char *sum;
+	snprintf(buf, sizeof(buf), "sha256sum %s", name);
+
+	FILE *fp;
+	fp = popen(buf, "r");
+	if (fp == NULL)
+		return 1;
+
+	while(fgets(buf, sizeof(buf), fp) != NULL) {
+		sum = strtok(buf, " ");
+	}
+	pclose(fp);
+
+	printf("%s %d\n", sum, strlen(sum));
+
+	tr->type = FWIMAGE_CHECKSUM;
+	tr->size = sizeof(*tr);
+
+	tr->size += CHECKSUM_MAXLEN;
+	trailer_update_crc(tr, sum, CHECKSUM_MAXLEN);
+	fwrite(sum, CHECKSUM_MAXLEN, 1, firmware_file);
+
+	append_trailer(firmware_file, tr);
+
+	return 0;
+}
+
+static int
 add_data(const char *name)
 {
 	struct fwimage_trailer tr = {
@@ -208,6 +243,8 @@ add_data(const char *name)
 		ret = add_metadata(&tr);
 	else if (signature_file)
 		ret = add_signature(&tr);
+	else if (append_checksum)
+		ret = add_checksum(&tr, name);
 
 	if (ret) {
 		fflush(firmware_file);
@@ -390,7 +427,7 @@ int main(int argc, char **argv)
 
 	crc32_filltable(crc_table);
 
-	while ((ch = getopt(argc, argv, "i:I:qs:S:t")) != -1) {
+	while ((ch = getopt(argc, argv, "i:I:qs:S:tC")) != -1) {
 		ret = 0;
 		switch(ch) {
 		case 'S':
@@ -398,6 +435,10 @@ int main(int argc, char **argv)
 			break;
 		case 'I':
 			ret = set_file(&metadata_file, optarg, MODE_APPEND);
+			break;
+		case 'C':
+			file_mode = MODE_APPEND;
+			append_checksum = true;
 			break;
 		case 's':
 			ret = set_file(&signature_file, optarg, MODE_EXTRACT);

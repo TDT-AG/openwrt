@@ -34,6 +34,7 @@ struct fwimage_trailer {
 enum fwimage_type {
 	FWIMAGE_SIGNATURE,
 	FWIMAGE_INFO,
+	FWIMAGE_CHECKSUM,
 };
 
 #endif
