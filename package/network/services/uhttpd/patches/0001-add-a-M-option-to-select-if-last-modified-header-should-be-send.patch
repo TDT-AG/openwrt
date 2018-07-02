@@ -1,0 +1,46 @@
+--- a/file.c
++++ b/file.c
+@@ -337,8 +337,9 @@ static void uh_file_response_ok_hdrs(str
+ 
+ 	if (s) {
+ 		ustream_printf(cl->us, "ETag: %s\r\n", uh_file_mktag(s, buf, sizeof(buf)));
+-		ustream_printf(cl->us, "Last-Modified: %s\r\n",
+-			       uh_file_unix2date(s->st_mtime, buf, sizeof(buf)));
++		if(!conf.no_last_modified_header)
++			ustream_printf(cl->us, "Last-Modified: %s\r\n",
++				       uh_file_unix2date(s->st_mtime, buf, sizeof(buf)));
+ 	}
+ 	ustream_printf(cl->us, "Date: %s\r\n",
+ 		       uh_file_unix2date(time(NULL), buf, sizeof(buf)));
+--- a/main.c
++++ b/main.c
+@@ -232,7 +232,7 @@ int main(int argc, char **argv)
+ 	init_defaults_pre();
+ 	signal(SIGPIPE, SIG_IGN);
+ 
+-	while ((ch = getopt(argc, argv, "A:aC:c:Dd:E:fh:H:I:i:K:k:L:l:m:N:n:p:qRr:Ss:T:t:U:u:Xx:y:")) != -1) {
++	while ((ch = getopt(argc, argv, "A:aC:c:Dd:E:fh:H:I:i:K:k:L:l:Mm:N:n:p:qRr:Ss:T:t:U:u:Xx:y:")) != -1) {
+ 		switch(ch) {
+ #ifdef HAVE_TLS
+ 		case 'C':
+@@ -311,6 +311,10 @@ int main(int argc, char **argv)
+ 			conf.rfc1918_filter = 1;
+ 			break;
+ 
++		case 'M':
++			conf.no_last_modified_header = 1;
++			break;
++
+ 		case 'n':
+ 			conf.max_script_requests = atoi(optarg);
+ 			break;
+--- a/uhttpd.h
++++ b/uhttpd.h
+@@ -77,6 +77,7 @@ struct config {
+ 	int ubus_noauth;
+ 	int ubus_cors;
+ 	int cgi_prefix_len;
++	int no_last_modified_header;
+ 	struct list_head cgi_alias;
+ };
+ 
