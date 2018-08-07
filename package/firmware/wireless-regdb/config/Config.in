@@ -1,0 +1,15 @@
+if PACKAGE_wireless-regdb
+
+config WIRELESS_REGDB_CUSTOM
+	bool "Customize wirelss regdb country selection"
+	default n
+        help
+          Enabling this allows full customization the wireless regdb
+          country selection.
+
+	if WIRELESS_REGDB_CUSTOM
+	source "Config-countries.in"
+	endif
+
+endif
+

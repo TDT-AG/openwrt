@@ -1,0 +1,6 @@
+country KZ: DFS-ETSI
+	(2402 - 2482 @ 40), (20)
+	(5150 - 5250 @ 80), (20), NO-OUTDOOR, AUTO-BW
+	(5250 - 5350 @ 80), (20), NO-OUTDOOR, DFS, AUTO-BW
+	(5470 - 5725 @ 80), (20), NO-OUTDOOR, DFS
+

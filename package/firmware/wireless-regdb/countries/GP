@@ -1,0 +1,6 @@
+country GP: DFS-ETSI
+	(2402 - 2482 @ 40), (20)
+	(5170 - 5250 @ 80), (20), AUTO-BW, wmmrule=ETSI
+	(5250 - 5330 @ 80), (20), DFS, AUTO-BW, wmmrule=ETSI
+	(5490 - 5710 @ 160), (27), DFS, wmmrule=ETSI
+

@@ -20,8 +20,18 @@ define Package/wireless-regdb
   TITLE:=Wireless Regulatory Database
 endef
 
+define Package/wireless-regdb/config
+	source "$(SOURCE)/config/Config.in
+endef
+
+define Build/Configure
+	$(CP) ./build_db.sh $(PKG_BUILD_DIR)/build_db.sh
+	$(CP) ./countries $(PKG_BUILD_DIR)/countries
+	$(PKG_BUILD_DIR)/build_db.sh $(TOPDIR)/.config
+endef
+
 define Build/Compile
-	$(STAGING_DIR_HOST)/bin/$(PYTHON) $(PKG_BUILD_DIR)/db2fw.py $(PKG_BUILD_DIR)/regulatory.db $(PKG_BUILD_DIR)/db.txt
+	$(STAGING_DIR_HOST)/bin/$(PYTHON) $(PKG_BUILD_DIR)/db2fw.py $(PKG_BUILD_DIR)/regulatory.db $(PKG_BUILD_DIR)/db-gen.txt
 endef
 
 define Package/wireless-regdb/install

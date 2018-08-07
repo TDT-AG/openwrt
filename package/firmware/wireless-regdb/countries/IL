@@ -1,0 +1,5 @@
+country IL: DFS-ETSI
+	(2402 - 2482 @ 40), (20)
+	(5150 - 5250 @ 80), (200 mW), NO-OUTDOOR, AUTO-BW
+	(5250 - 5350 @ 80), (200 mW), NO-OUTDOOR, DFS, AUTO-BW
+
