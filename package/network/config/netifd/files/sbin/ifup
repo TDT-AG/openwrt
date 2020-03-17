@@ -6,7 +6,9 @@ setup_wifi=
 if_call() {
 	local interface="$1"
 	for mode in $modes; do
+		env -i ACTION="pre-${mode}" INTERFACE="$interface" /sbin/hotplug-call netifd
 		ubus call network.interface $mode "{ \"interface\" : \"$interface\" }"
+		env -i ACTION="post-${mode}" INTERFACE="$interface" /sbin/hotplug-call netifd
 	done
 }
 
