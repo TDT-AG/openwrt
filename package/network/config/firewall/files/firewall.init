@@ -37,7 +37,7 @@ service_triggers() {
 	procd_close_validate
 }
 
-restart() {
+restart_service() {
 	fw3 restart
 }
 
