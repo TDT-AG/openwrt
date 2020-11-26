@@ -329,6 +329,37 @@ _procd_add_config_trigger() {
 	json_close_array
 }
 
+_procd_add_service_trigger() {
+	json_add_array
+	_procd_add_array_data "$1"
+	shift
+
+	json_add_array
+	_procd_add_array_data "if"
+
+	json_add_array
+	_procd_add_array_data "eq" "service" "$1"
+	shift
+	json_close_array
+
+	json_add_array
+	_procd_add_array_data "run_script" "$@"
+	json_close_array
+
+	json_close_array
+	_procd_add_timeout
+	json_close_array
+}
+
+_procd_add_restart_service_trigger() {
+	local service=$1
+	shift
+
+	_procd_open_trigger
+	_procd_add_service_trigger "service.restart" "$service" "$@"
+	_procd_close_trigger
+}
+
 _procd_add_raw_trigger() {
 	json_add_array
 	_procd_add_array_data "$1"
@@ -559,6 +590,8 @@ _procd_wrapper \
 	procd_add_instance \
 	procd_add_raw_trigger \
 	procd_add_config_trigger \
+	procd_add_service_trigger \
+	procd_add_restart_service_trigger \
 	procd_add_interface_trigger \
 	procd_add_reload_trigger \
 	procd_add_reload_interface_trigger \
