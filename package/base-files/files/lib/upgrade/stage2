@@ -36,7 +36,7 @@ switch_to_ramfs() {
 	for binary in \
 		/bin/busybox /bin/ash /bin/sh /bin/mount /bin/umount	\
 		pivot_root mount_root reboot sync kill sleep		\
-		md5sum hexdump cat zcat bzcat dd tar			\
+		md5sum hexdump cat zcat bzcat dd tar pgrep		\
 		ls basename find cp mv rm mkdir rmdir mknod touch chmod \
 		'[' printf wc grep awk sed cut				\
 		mtd partx losetup mkfs.ext4 nandwrite flash_erase	\
@@ -111,9 +111,9 @@ kill_remaining() { # [ <signal> [ <loop> ] ]
 
 indicate_upgrade
 
-killall -9 telnetd
-killall -9 dropbear
-killall -9 ash
+pgrep telnetd >/dev/null && killall -9 telnetd
+pgrep dropbear >/dev/null && killall -9 dropbear
+pgrep ash >/dev/null && killall -9 ash
 
 kill_remaining TERM
 sleep 3
