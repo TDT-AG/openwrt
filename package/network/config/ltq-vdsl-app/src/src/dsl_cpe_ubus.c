@@ -306,7 +306,9 @@ static void version_information(int fd) {
 static void line_state(int fd) {
 	IOCTL(DSL_LineState_t, DSL_FIO_LINE_STATE_GET)
 
+	void *c;
 	const char *str;
+
 	switch (out.data.nLineState) {
 	STR_CASE(DSL_LINESTATE_NOT_INITIALIZED, "Not initialized")
 	STR_CASE(DSL_LINESTATE_EXCEPTION, "Exception")
@@ -351,8 +353,13 @@ static void line_state(int fd) {
 		str = NULL;
 		break;
 	};
-	if (str)
-		m_str("state", str);
+
+	if (str) {
+		c = blobmsg_open_table(&b, "line_state");
+		m_u32("number", out.data.nLineState);
+		m_str("string", str);
+		blobmsg_close_table(&b, c);
+	}
 
 	m_bool("up", out.data.nLineState == DSL_LINESTATE_SHOWTIME_TC_SYNC);
 }
@@ -377,7 +384,9 @@ static void g997_line_inventory(int fd) {
 static void g997_power_management_status(int fd) {
 	IOCTL(DSL_G997_PowerManagementStatus_t, DSL_FIO_G997_POWER_MANAGEMENT_STATUS_GET)
 
+	void *c;
 	const char *str;
+
 	switch (out.data.nPowerManagementStatus) {
 	STR_CASE(DSL_G997_PMS_NA, "Power management state is not available")
 	STR_CASE(DSL_G997_PMS_L0, "L0 - Synchronized")
@@ -388,8 +397,13 @@ static void g997_power_management_status(int fd) {
 		str = NULL;
 		break;
 	};
-	if (str)
-		m_str("power_state", str);
+
+	if (str) {
+		c = blobmsg_open_table(&b, "power_state");
+		m_u32("number", out.data.nPowerManagementStatus);
+		m_str("string", str);
+		blobmsg_close_table(&b, c);
+	}
 }
 
 static void g997_xtu_system_enabling(int fd, standard_t *standard) {
