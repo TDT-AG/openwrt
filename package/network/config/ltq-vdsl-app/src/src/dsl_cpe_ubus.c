@@ -351,8 +351,18 @@ static void line_state(int fd) {
 		str = NULL;
 		break;
 	};
-	if (str)
-		m_str("state", str);
+
+	void *c;
+	c = blobmsg_open_table(&b, "line_state");
+	if (str) {
+		m_u32("mumber", out.data.nLineState);
+		m_str("string", str);
+	}
+	else {
+		m_u32("mumber", -1);
+		m_str("string", "unknown");
+	}
+	blobmsg_close_table(&b, c);
 
 	m_bool("up", out.data.nLineState == DSL_LINESTATE_SHOWTIME_TC_SYNC);
 }
@@ -388,8 +398,18 @@ static void g997_power_management_status(int fd) {
 		str = NULL;
 		break;
 	};
-	if (str)
-		m_str("power_state", str);
+
+	void *c;
+	c = blobmsg_open_table(&b, "power_state");
+	if (str) {
+		m_u32("mumber", out.data.nPowerManagementStatus);
+		m_str("string", str);
+	}
+	else {
+		m_u32("mumber", -1);
+		m_str("string", "unknown");
+	}
+	blobmsg_close_table(&b, c);
 }
 
 static void g997_xtu_system_enabling(int fd, standard_t *standard) {
