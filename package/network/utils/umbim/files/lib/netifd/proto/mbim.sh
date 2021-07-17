@@ -19,6 +19,7 @@ proto_mbim_init_config() {
 	proto_config_add_string username
 	proto_config_add_string password
 	proto_config_add_boolean dhcp
+	proto_config_add_boolean ipv6
 	proto_config_add_defaults
 }
 
@@ -27,8 +28,8 @@ _proto_mbim_setup() {
 	local tid=2
 	local ret
 
-	local device pdptype apn pincode delay auth username password dhcp $PROTO_DEFAULT_OPTIONS
-	json_get_vars device pdptype apn pincode delay auth username password dhcp $PROTO_DEFAULT_OPTIONS
+	local device pdptype apn pincode delay auth username password dhcp ipv6 $PROTO_DEFAULT_OPTIONS
+	json_get_vars device pdptype apn pincode delay auth username password dhcp ipv6 $PROTO_DEFAULT_OPTIONS
 
 	[ -n "$ctl_device" ] && device=$ctl_device
 
@@ -213,14 +214,16 @@ _proto_mbim_setup() {
 		json_close_object
 		ubus call network add_dynamic "$(json_dump)"
 
-		json_init
-		json_add_string name "${interface}_6"
-		json_add_string ifname "@$interface"
-		json_add_string proto "dhcpv6"
-		json_add_string extendprefix 1
-		proto_add_dynamic_defaults
-		json_close_object
-		ubus call network add_dynamic "$(json_dump)"
+		if [ "$ipv6" = 1 ]; then
+			json_init
+			json_add_string name "${interface}_6"
+			json_add_string ifname "@$interface"
+			json_add_string proto "dhcpv6"
+			json_add_string extendprefix 1
+			proto_add_dynamic_defaults
+			json_close_object
+			ubus call network add_dynamic "$(json_dump)"
+		fi
 	fi
 
 	uci_set_state network $interface tid "$tid"
