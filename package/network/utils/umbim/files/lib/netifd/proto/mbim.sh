@@ -155,38 +155,51 @@ _proto_mbim_setup() {
 		eval $(umbim $DBG -n -t $tid -d $device config | sed 's/: /=/g')
 		tid=$((tid + 1))
 
+		[ -n "$ipv4address" ] || [ -n "$ipv6address" ] || {
+			echo "mbim[$$]" "Failed to obtain IP address"
+			proto_notify_error "$interface" CONFIG_FAILED
+			return 1
+		}
+
 		proto_init_update "$ifname" 1
 		proto_send_update "$interface"
 
-		json_init
-		json_add_string name "${interface}_4"
-		json_add_string ifname "@$interface"
-		json_add_string proto "static"
-		json_add_array ipaddr
-		json_add_string "" "$ipv4address"
-		json_close_array
-		json_add_string gateway "$ipv4gateway"
-		json_add_array dns
-		json_add_string "" "$ipv4dnsserver"
-		json_close_array
-		proto_add_dynamic_defaults
-		json_close_object
-		ubus call network add_dynamic "$(json_dump)"
+		[ -n "$ipv4address" ] && {
+			echo "mbim[$$]" "Configure IPv4 on $ifname"
+			json_init
+			json_add_string name "${interface}_4"
+			json_add_string ifname "@$interface"
+			json_add_string proto "static"
+			json_add_array ipaddr
+			json_add_string "" "$ipv4address"
+			json_close_array
+			json_add_string gateway "$ipv4gateway"
+			json_add_array dns
+			json_add_string "" "$ipv4dnsserver"
+			json_close_array
+			proto_add_dynamic_defaults
+			json_close_object
+			ubus call network add_dynamic "$(json_dump)"
+		}
 
-		json_init
-		json_add_string name "${interface}_6"
-		json_add_string ifname "@$interface"
-		json_add_string proto "static"
-		json_add_array ip6addr
-		json_add_string "" "$ipv6address"
-		json_close_array
-		json_add_string ip6gw "$ipv6gateway"
-		json_add_array dns
-		json_add_string "" "$ipv6dnsserver"
-		json_close_array
-		proto_add_dynamic_defaults
-		json_close_object
-		ubus call network add_dynamic "$(json_dump)"
+		[ -n "$ipv6address" ] && {
+			echo "mbim[$$]" "Configure IPv6 on $ifname"
+			json_init
+			json_add_string name "${interface}_6"
+			json_add_string ifname "@$interface"
+			json_add_string proto "static"
+			json_add_array ip6addr
+			json_add_string "" "$ipv6address"
+			json_close_array
+			json_add_string ip6gw "$ipv6gateway"
+			json_add_array dns
+			json_add_string "" "$ipv6dnsserver"
+			json_close_array
+			proto_add_dynamic_defaults
+			json_close_object
+			ubus call network add_dynamic "$(json_dump)"
+		}
+
 	else
 		echo "mbim[$$]" "Starting DHCP on $ifname"
 		proto_init_update "$ifname" 1
