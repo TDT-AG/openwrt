@@ -1,0 +1,29 @@
+From a656cfbab4e2a7ed806e0c01aa26a04a288fb310 Mon Sep 17 00:00:00 2001
+From: Martin Schiller <ms@dev.tdt.de>
+Date: Mon, 13 Dec 2021 12:04:25 +0100
+Subject: [PATCH] serial: lantiq: Add INTEL_MIPS in Kconfig dependencies
+
+Lantiq serial driver/IP is reused for the intel mips based SoC as well.
+Update the Kconfig accordingly.
+
+Signed-off-by: Martin Schiller <ms@dev.tdt.de>
+---
+ drivers/tty/serial/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/tty/serial/Kconfig b/drivers/tty/serial/Kconfig
+index 28f22e58639c..7bfd3c602762 100644
+--- a/drivers/tty/serial/Kconfig
++++ b/drivers/tty/serial/Kconfig
+@@ -1046,7 +1046,7 @@ config SERIAL_SIFIVE_CONSOLE
+ 
+ config SERIAL_LANTIQ
+ 	tristate "Lantiq serial driver"
+-	depends on (LANTIQ || X86) || COMPILE_TEST
++	depends on (INTEL_MIPS || LANTIQ || X86) || COMPILE_TEST
+ 	select SERIAL_CORE
+ 	help
+ 	  Support for UART on Lantiq and Intel SoCs.
+-- 
+2.20.1
+
