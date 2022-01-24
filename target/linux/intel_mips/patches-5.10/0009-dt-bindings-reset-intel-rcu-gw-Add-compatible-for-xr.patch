@@ -1,0 +1,39 @@
+From 093879a07b27bc4ba1cb8ca394e258d31660f0b1 Mon Sep 17 00:00:00 2001
+From: Martin Schiller <ms@dev.tdt.de>
+Date: Mon, 24 Jan 2022 07:36:36 +0100
+Subject: [PATCH] dt-bindings: reset: intel,rcu-gw: Add compatible for xrx500
+
+This adds support for the Intel MIPS interAptiv xrx500 SoCs.
+Like the xrx200, the 2nd status register address is shifted, but reset
+cell count is 2 as bit offset in reset request and reset status
+registers is same.
+
+Signed-off-by: Martin Schiller <ms@dev.tdt.de>
+---
+ Documentation/devicetree/bindings/reset/intel,rcu-gw.yaml | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/Documentation/devicetree/bindings/reset/intel,rcu-gw.yaml b/Documentation/devicetree/bindings/reset/intel,rcu-gw.yaml
+index 6b2d56cc3f38..79518e02d8e0 100644
+--- a/Documentation/devicetree/bindings/reset/intel,rcu-gw.yaml
++++ b/Documentation/devicetree/bindings/reset/intel,rcu-gw.yaml
+@@ -14,6 +14,7 @@ properties:
+     enum:
+       - intel,rcu-lgm
+       - intel,rcu-xrx200
++      - intel,rcu-xrx500
+ 
+   reg:
+     description: Reset controller registers.
+@@ -35,7 +36,7 @@ properties:
+       First cell is reset request register offset.
+       Second cell is bit offset in reset request register.
+       Third cell is bit offset in reset status register.
+-      For LGM SoC, reset cell count is 2 as bit offset in
++      For LGM and XRX500 SoCs, reset cell count is 2 as bit offset in
+       reset request and reset status registers is same. Whereas
+       3 for legacy SoCs as bit offset differs.
+ 
+-- 
+2.20.1
+

@@ -46,21 +46,36 @@
 		mti,reserved-ipi-vectors = <56 8>;
 	};
 
-	cgu: cgu@16200000 {
-		compatible = "intel,grx500-cgu", "syscon";
-		reg = <0x16200000 0x200>;
-		#clock-cells = <1>;
-	};
+	ssx4@16000000 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		compatible = "lantiq,ssx", "simple-bus";
+		reg = <0x16000000 0x2000000>;
+		ranges = <0x0 0x16000000 0x02000000>;
 
-	asc0: serial@16600000 {
-		compatible = "lantiq,asc";
-		reg = <0x16600000 0x100000>;
+		rcu0: reset-controller@0 {
+			compatible = "intel,rcu-xrx500", "syscon";
+			reg = <0x0 0x100000>;
+			intel,global-reset = <0x10 30>;
+			#reset-cells = <2>;
+		};
 
-		interrupt-parent = <&gic>;
-		interrupts = <GIC_SHARED 103 IRQ_TYPE_LEVEL_HIGH>,
-			<GIC_SHARED 105 IRQ_TYPE_LEVEL_HIGH>,
-			<GIC_SHARED 106 IRQ_TYPE_LEVEL_HIGH>;
-		clocks = <&cgu CLK_SSX4>, <&cgu GCLK_UART>;
-		clock-names = "freq", "asc";
+		cgu: cgu@200000 {
+			compatible = "intel,grx500-cgu", "syscon";
+			reg = <0x200000 0x200>;
+			#clock-cells = <1>;
+		};
+
+		asc0: serial@600000 {
+			compatible = "lantiq,asc";
+			reg = <0x600000 0x100000>;
+
+			interrupt-parent = <&gic>;
+			interrupts = <GIC_SHARED 103 IRQ_TYPE_LEVEL_HIGH>,
+				<GIC_SHARED 105 IRQ_TYPE_LEVEL_HIGH>,
+				<GIC_SHARED 106 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&cgu CLK_SSX4>, <&cgu GCLK_UART>;
+			clock-names = "freq", "asc";
+		};
 	};
 };
