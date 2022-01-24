@@ -1,0 +1,48 @@
+From f3a31166189df8c1df13b0c944ed79930377fde7 Mon Sep 17 00:00:00 2001
+From: Martin Schiller <ms@dev.tdt.de>
+Date: Tue, 18 Jan 2022 14:39:02 +0100
+Subject: [PATCH] pinctrl: equilibrium: Add INTEL_MIPS in Kconfig dependencies
+
+The Equilibrium pinctrl driver can also be used for the Intel MIPS
+interAptiv SoCs.
+
+Signed-off-by: Martin Schiller <ms@dev.tdt.de>
+---
+ drivers/pinctrl/Kconfig | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/drivers/pinctrl/Kconfig b/drivers/pinctrl/Kconfig
+index 815095326e2d..63a38a87ba5b 100644
+--- a/drivers/pinctrl/Kconfig
++++ b/drivers/pinctrl/Kconfig
+@@ -412,9 +412,9 @@ config PINCTRL_TB10X
+ 	select GPIOLIB
+ 
+ config PINCTRL_EQUILIBRIUM
+-	tristate "Generic pinctrl and GPIO driver for Intel Lightning Mountain SoC"
++	tristate "Generic pinctrl and GPIO driver for Intel MIPS and LGM SoCs"
+ 	depends on OF && HAS_IOMEM
+-	depends on X86 || COMPILE_TEST
++	depends on (INTEL_MIPS || X86) || COMPILE_TEST
+ 	select PINMUX
+ 	select PINCONF
+ 	select GPIOLIB
+@@ -425,10 +425,10 @@ config PINCTRL_EQUILIBRIUM
+ 	select GENERIC_PINMUX_FUNCTIONS
+ 
+ 	help
+-	  Equilibrium pinctrl driver is a pinctrl & GPIO driver for Intel Lightning
+-	  Mountain network processor SoC that supports both the linux GPIO and pin
+-	  control frameworks. It provides interfaces to setup pinmux, assign desired
+-	  pin functions, configure GPIO attributes for LGM SoC pins. Pinmux and
+-	  pinconf settings are retrieved from device tree.
++	  Equilibrium pinctrl driver is a pinctrl & GPIO driver for Intel MIPS and
++	  Lightning Mountain network processor SoCs that supports both the linux GPIO
++	  and pin control frameworks. It provides interfaces to setup pinmux, assign
++	  desired pin functions, configure GPIO attributes for LGM SoC pins. Pinmux
++	  and pinconf settings are retrieved from device tree.
+ 
+ endif
+-- 
+2.20.1
+
