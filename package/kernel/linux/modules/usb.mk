@@ -284,6 +284,10 @@ define KernelPackage/usb-ohci
 	CONFIG_USB_OCTEON_OHCI=y \
 	CONFIG_USB_OHCI_HCD_OMAP3=y \
 	CONFIG_USB_OHCI_HCD_PLATFORM=y
+  ifeq ($(CONFIG_BIG_ENDIAN),y)
+    KCONFIG+=CONFIG_USB_OHCI_BIG_ENDIAN_DESC=y
+    KCONFIG+=CONFIG_USB_OHCI_BIG_ENDIAN_MMIO=y
+  endif
   FILES:= \
 	$(LINUX_DIR)/drivers/usb/host/ohci-hcd.ko \
 	$(LINUX_DIR)/drivers/usb/host/ohci-platform.ko
