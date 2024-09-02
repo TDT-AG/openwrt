@@ -1,0 +1,12 @@
+do_config_generate() {
+	[ -f /etc/board.json ] || {
+		echo "- generating board file -"
+		/bin/board_detect /tmp/board.json
+		mv /tmp/board.json /etc/board.json
+
+		/bin/config_generate > /dev/null
+	}
+}
+
+boot_hook_add preinit_main do_config_generate
+boot_hook_add initramfs do_config_generate
