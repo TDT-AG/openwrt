@@ -12,4 +12,4 @@ apply_bootconfig() {
 	esac
 }
 
-[ "$INITRAMFS" = "1" ] || boot_hook_add preinit_main apply_bootconfig
+boot_hook_add preinit_main apply_bootconfig

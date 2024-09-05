@@ -9,4 +9,4 @@ do_set_root_part() {
 	fi
 }
 
-[ "$INITRAMFS" = "1" ] || boot_hook_add preinit_main do_set_root_part
+boot_hook_add preinit_main do_set_root_part
