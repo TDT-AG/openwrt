@@ -1,0 +1,644 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2024-2026 TDT AG <development@tdt.de>
+ * Copyright (C) 2020-2024 MaxLinear, Inc.
+ * Copyright (C) 2018-2020 Intel Corporation.
+ */
+
+#include <dt-bindings/clock/intel,lgm-clk.h>
+#include <dt-bindings/phy/phy.h>
+
+/ {
+	#address-cells = <1>;
+	#size-cells = <1>;
+	compatible = "mxl,lgm", "intel,lgm";
+
+	aliases {
+		serial0 = &asc0;
+		cpu0    = &cpu0;
+		cpu1    = &cpu1;
+		cpu2    = &cpu2;
+		cpu3    = &cpu3;
+		pcie2   = &pcie30;
+		pcie7   = &pcie41;
+	};
+
+	cpus {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		cpu0:cpu@0 {
+			device_type = "cpu";
+			compatible = "intel,lgm";
+			reg = <0>;
+			#cooling-cells = <2>; /* min followed by max */
+		};
+
+		cpu1:cpu@2 {
+			device_type = "cpu";
+			compatible = "intel,lgm";
+			reg = <2>;
+			#cooling-cells = <2>; /* min followed by max */
+		};
+
+		cpu2:cpu@8 {
+			device_type = "cpu";
+			compatible = "intel,lgm";
+			reg = <8>;
+			#cooling-cells = <2>; /* min followed by max */
+		};
+
+		cpu3:cpu@a {
+			device_type = "cpu";
+			compatible = "intel,lgm";
+			reg = <0xa>;
+			#cooling-cells = <2>; /* min followed by max */
+		};
+	};
+
+	/* Special part from CPU core */
+	core: core {
+		compatible = "intel,core", "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		ioapic1: interrupt-controller@fec00000 {
+			#interrupt-cells = <2>;
+			#address-cells = <0>;
+			compatible = "intel,ce4100-ioapic";
+			interrupt-controller;
+			reg = <0xfec00000 0x1000>;
+			nr_entries = <256>;
+		};
+
+		lapic0: interrupt-controller@fee00000 {
+			compatible = "intel,ce4100-lapic";
+			reg = <0xfee00000 0x1000>;
+			intel,virtual-wire-mode;
+		};
+	};
+
+	/* Flat cross bar */
+	soc: soc {
+		compatible = "intel,soc", "simple-bus";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		restart_poweroff {
+			compatible = "restart-poweroff";
+		};
+
+		rcu0: reset-controller@e0000000 {
+			compatible = "intel,rcu-lgm", "syscon-icc", "syscon";
+			reg = <0xe0000000 0x20000>;
+			#reset-cells = <2>;
+			intel,global-reset = <0x10 30>;
+		};
+
+		sysconf: chiptop@e0020000 {
+			compatible = "mxl,chiptop-lgm", "syscon-icc", "syscon";
+			reg = <0xe0020000 0x1000>;
+			#reset-cells = <1>;
+		};
+
+		hsior: hsio@e0080000 {
+			compatible = "intel,hsio-lgm", "syscon";
+			reg = <0xe0080000 0x330>;
+		};
+
+		hsiol: hsio@e00a0000 {
+			compatible = "intel,hsio-lgm", "syscon";
+			reg = <0xe00a0000 0x330>;
+		};
+
+		cgu0: cgu@e0200000 {
+			#address-cells = <1>;
+			#size-cells = <1>;
+			compatible = "intel,cgu-lgm", "syscon-icc", "syscon";
+			reg = <0xe0200000 0x33c>;
+			#clock-cells = <1>;
+		};
+
+		pinctrl: pinctrl@e2800000 {
+			compatible = "intel,lgm-io";
+			reg = <0xe2880000 0x100000>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+			#pinctrl-cells = <2>;
+			ranges;
+
+			pinctrl,syscon = <&sysconf>;
+			gpio0: gpio@e2800000 {
+				gpio-controller;
+				#gpio-cells = <2>;
+				reg = <0xe2800000 0x80>;
+				interrupt-controller;
+				#interrupt-cells = <2>;
+				interrupt-parent = <&ioapic1>;
+				interrupts = <135 1>;
+				gpio-ranges = <&pinctrl 0 0 32>;
+			};
+
+			gpio1: gpio@e2800100 {
+				gpio-controller;
+				#gpio-cells = <2>;
+				reg = <0xe2800100 0x80>;
+				interrupt-controller;
+				#interrupt-cells = <2>;
+				interrupt-parent = <&ioapic1>;
+				interrupts = <136 1>;
+				gpio-ranges = <&pinctrl 0 32 32>;
+			};
+
+			gpio2: gpio@e2800200 {
+				gpio-controller;
+				#gpio-cells = <2>;
+				reg = <0xe2800200 0x80>;
+				interrupt-controller;
+				#interrupt-cells = <2>;
+				interrupt-parent = <&ioapic1>;
+				interrupts = <137 1>;
+				gpio-ranges = <&pinctrl 0 64 32>;
+			};
+
+			gpio3: gpio@e2800300 {
+				gpio-controller;
+				#gpio-cells = <2>;
+				reg = <0xe2800300 0x80>;
+				interrupt-controller;
+				#interrupt-cells = <2>;
+				interrupt-parent = <&ioapic1>;
+				interrupts = <138 1>;
+				gpio-ranges = <&pinctrl 0 96 8>;
+			};
+		};
+
+		soc_msi: soc_msi@e00e0000 {
+			compatible = "intel,soc-msi";
+			reg = <0xe00e0000 0x800>;
+			interrupt-controller;
+			#interrupt-cells = <1>;
+			dma-coherent;
+		};
+
+		asc0: serial@e0a00000 {
+			compatible = "intel,lgm-asc";
+			reg = <0xe0a00000 0x1000>;
+			interrupt-parent = <&ioapic1>;
+			interrupts = <128 1>;
+			interrupt-names = "asc_irq";
+			clocks = <&cgu0 LGM_CLK_NOC4>, <&cgu0 LGM_GCLK_ASC0>;
+			clock-names = "freq", "asc";
+			pinctrl-names = "default";
+			pinctrl-0 = <&uart0_pins>;
+		};
+
+		asc1: serial@e0c00000 {
+			status = "disabled";
+			compatible = "intel,lgm-asc";
+			reg = <0xe0c00000 0x1000>;
+			interrupt-parent = <&ioapic1>;
+			interrupts = <111 1>;
+			interrupt-names = "asc_irq";
+			clocks = <&cgu0 LGM_CLK_NOC4>, <&cgu0 LGM_GCLK_ASC1>;
+			clock-names = "freq", "asc";
+			pinctrl-names = "default";
+			pinctrl-0 = <&uart1_pins>;
+		};
+
+		asc2: serial@e1100000 {
+			status = "disabled";
+			compatible = "intel,lgm-asc";
+			reg = <0xe1100000 0x1000>;
+			interrupt-parent = <&ioapic1>;
+			interrupts = <129 1>;
+			interrupt-names = "asc_irq";
+			clocks = <&cgu0 LGM_CLK_NOC4>, <&cgu0 LGM_GCLK_ASC2>;
+			clock-names = "freq", "asc";
+			pinctrl-names = "default";
+			pinctrl-0 = <&uart2_pins>;
+		};
+
+		asc3: serial@e0300000 {
+			status = "disabled";
+			compatible = "intel,lgm-asc";
+			reg = <0xe0300000 0x1000>;
+			interrupt-parent = <&ioapic1>;
+			interrupts = <130 1>;
+			interrupt-names = "asc_irq";
+			clocks = <&cgu0 LGM_CLK_NOC4>, <&cgu0 LGM_GCLK_ASC3>;
+			clock-names = "freq", "asc";
+			pinctrl-names = "default";
+			pinctrl-0 = <&uart3_pins>;
+		};
+
+		usb0: usb@0 {
+			status = "disabled";
+			compatible = "intel,lgm-dwc3";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges;
+			clocks = <&cgu0 LGM_GCLK_USB1>;
+
+			usb@e7d00000 {
+				compatible = "snps,dwc3";
+				reg = <0xe7d00000 0x10000>;
+				interrupt-parent = <&ioapic1>;
+				interrupts = <47 1>;
+				dr_mode = "host";
+				dma-coherent;
+				usb-phy = <&usb0_phy>;
+			};
+	        };
+
+		usb0_phy: usb-phy@e7e00000 {
+			status = "disabled";
+			compatible ="intel,lgm-usb-phy";
+			reg = <0xe7e00000 0x10000>;
+			interrupt-parent = <&ioapic1>;
+			interrupts = <46 1>;
+			resets = <&rcu0 0x70 22>, <&rcu0 0x70 26>,
+				 <&rcu0 0x70 24>, <&rcu0 0x70 28>;
+			reset-names = "ctrl", "apb", "phy", "phy31";
+			#phy-cells = <0>;
+		};
+
+		usb1: usb@1 {
+			status = "disabled";
+			compatible = "intel,lgm-dwc3";
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges;
+			clocks = <&cgu0 LGM_GCLK_USB2>;
+
+			usb@e6e00000 {
+				compatible = "snps,dwc3";
+				reg = <0xe6e00000 0x10000>;
+				interrupt-parent = <&ioapic1>;
+				interrupts = <49 1>;
+				dr_mode = "host";
+				dma-coherent;
+				usb-phy = <&usb1_phy>;
+			};
+		};
+
+		usb1_phy: usb-phy@e6f00000 {
+			status = "disabled";
+			compatible ="intel,lgm-usb-phy";
+			reg = <0xe6f00000 0x10000>;
+			interrupt-parent = <&ioapic1>;
+			interrupts = <48 1>;
+			resets = <&rcu0 0x70 23>, <&rcu0 0x70 27>,
+				<&rcu0 0x70 25>, <&rcu0 0x70 29>;
+			reset-names = "ctrl", "apb", "phy", "phy31";
+			#phy-cells = <0>;
+		};
+
+		// i2c0: i2c@e0500000 {
+		// 	compatible = "mxl,lgm-i2c";
+		// 	#address-cells = <1>;
+		// 	#size-cells = <0>;
+		// 	reg = <0xe0500000 0x100>;
+		// 	interrupt-parent = <&ioapic1>;
+		// 	interrupts = <41 1>;
+		// 	clocks =  <&cgu0 LGM_CLK_NOC4>, <&cgu0 LGM_GCLK_I2C0>;
+		// 	clock-names = "ic_clk", "pclk";
+		// 	clock-frequency = <400000>;
+		// 	i2c-sda-hold-time-ns = <400>;
+		// 	resets = <&rcu0 0x40 1>;
+		// 	pinctrl-names = "default";
+		// 	pinctrl-0 = <&i2c0_pins>;
+		// };
+
+		i2c1: i2c@e1300000 {
+			status = "disabled";
+			compatible = "snps,designware-i2c";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0xe1300000 0x100>;
+			interrupt-parent = <&ioapic1>;
+			interrupts = <73 1>;
+			clocks =  <&cgu0 LGM_CLK_NOC4>, <&cgu0 LGM_GCLK_I2C1>;
+			clock-names = "ic_clk", "pclk";
+			clock-frequency = <100000>;
+			i2c-sda-hold-time-ns = <500>;
+			resets = <&rcu0 0x30 9>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&i2c1_pins>;
+		};
+
+		i2c2: i2c@e1f00000 {
+			status = "disabled";
+			compatible = "snps,designware-i2c";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0xe1f00000 0x100>;
+			interrupt-parent = <&ioapic1>;
+			interrupts = <74 1>;
+			clocks =  <&cgu0 LGM_CLK_NOC4>, <&cgu0 LGM_GCLK_I2C2>;
+			clock-names = "ic_clk", "pclk";
+			clock-frequency = <100000>;
+			i2c-sda-hold-time-ns = <500>;
+			resets = <&rcu0 0x30 10>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&i2c2_pins>;
+		};
+
+		i2c3: i2c@e2000000 {
+			status = "disabled";
+			compatible = "snps,designware-i2c";
+			#address-cells = <1>;
+			#size-cells = <0>;
+			reg = <0xe2000000 0x100>;
+			interrupt-parent = <&ioapic1>;
+			interrupts = <75 1>;
+			clocks =  <&cgu0 LGM_CLK_NOC4>, <&cgu0 LGM_GCLK_I2C3>;
+			clock-names = "ic_clk", "pclk";
+			clock-frequency = <100000>;
+			i2c-sda-hold-time-ns = <500>;
+			resets = <&rcu0 0x30 11>;
+			pinctrl-names = "default";
+			pinctrl-0 = <&i2c3_pins>;
+		};
+
+		emmc: sdhci@ec700000 {
+			status = "disabled";
+			compatible = "intel,lgm-sdhci-5.1-emmc",
+				     "arasan,sdhci-5.1";
+			reg = <0xec700000 0x300>;
+			interrupt-parent = <&ioapic1>;
+			interrupts = <44 1>;
+			clocks = <&cgu0 LGM_CLK_EMMC>, <&cgu0 LGM_GCLK_EMMC>;
+			clock-names = "clk_xin", "clk_ahb";
+			clock-frequency = <200000000>;
+			clock-output-names = "emmc_cardclock", "emmc_sampleclock";
+			#clock-cells = <1>;
+			phys = <&emmc_phy>;
+			phy-names = "phy_arasan";
+			arasan,soc-ctl-syscon = <&sysconf>;
+			dma-coherent;
+		};
+
+		emmc_phy: emmc_phy {
+			status = "disabled";
+			compatible = "intel,lgm-emmc-phy";
+			intel,syscon = <&sysconf>;
+			clocks = <&emmc 0>;
+			clock-names = "emmcclk";
+			#phy-cells = <0>;
+		};
+
+		combophy0: combo-phy@d0a00000 {
+			status = "disabled";
+			compatible = "intel,combophy-lgm", "intel,combo-phy";
+			clocks = <&cgu0 LGM_CLK_CBPHY1>;
+			#phy-cells = <1>;
+			reg = <0xd0a00000 0x40000>,	// PHY1
+				<0xd0a40000 0x1000>;	// PHY1
+//			reg = <0xd0b00000 0x40000>,	// PHY2
+//				<0xd0b40000 0x1000>;	// PHY2
+			reg-names = "core", "app";
+			resets = <&rcu0 0x50 6>,
+				<&rcu0 0x50 17>,
+				<&rcu0 0x50 23>,	// pcie10
+				<&rcu0 0x50 24>;	// pcie11
+//				<&rcu0 0x50 12>,	// xpcs0
+//				<&rcu0 0x50 13>;	// xpcs1
+			reset-names = "phy", "core", "iphy0", "iphy1";
+			intel,syscfg = <&sysconf 0>;
+			intel,hsio = <&hsiol 0>;
+		};
+
+		combophy1: combo-phy@d0c00000 {
+			status = "disabled";
+			compatible = "intel,combophy-lgm", "intel,combo-phy";
+			clocks = <&cgu0 LGM_CLK_CBPHY1>;
+			#phy-cells = <1>;
+			reg = <0xd0c00000 0x40000>,	// PHY1
+				<0xd0c40000 0x1000>;	// PHY1
+//			reg = <0xd0d00000 0x40000>,	// PHY2
+//				<0xd0d40000 0x1000>;	// PHY2
+			reg-names = "core", "app";
+			resets = <&rcu0 0x50 8>,
+				<&rcu0 0x50 18>,
+				<&rcu0 0x50 25>,
+				<&rcu0 0x50 26>;
+			reset-names = "phy", "core", "iphy0", "iphy1";
+			intel,syscfg = <&sysconf 1>;
+			intel,hsio = <&hsiol 1>;
+		};
+
+		combophy2: combo-phy@c0a00000 {
+			status = "disabled";
+			compatible = "intel,combophy-lgm", "intel,combo-phy";
+			clocks = <&cgu0 LGM_CLK_CBPHY2>;
+			#phy-cells = <1>;
+			reg = <0xc0a00000 0x40000>,	// PHY1
+				<0xc0a40000 0x1000>;	// PHY1
+//			reg = <0xc0b00000 0x40000>,	// PHY2
+//				<0xc0b40000 0x1000>;	// PHY2
+			reg-names = "core", "app";
+			resets = <&rcu0 0x60 6>,
+				<&rcu0 0x60 17>,
+				<&rcu0 0x60 23>,	// pcie20
+				<&rcu0 0x60 24>;	// pcie21
+//				<&rcu0 0x60 12>,	// xpcs2
+//				<&rcu0 0x60 13>;	// xpcs3
+			reset-names = "phy", "core", "iphy0", "iphy1";
+			intel,syscfg = <&sysconf 2>;
+			intel,hsio = <&hsior 0>;
+		};
+
+		combophy3: combo-phy@c0c00000 {
+			status = "disabled";
+			compatible = "intel,combophy-lgm", "intel,combo-phy";
+			clocks = <&cgu0 LGM_CLK_CBPHY3>;
+			#phy-cells = <1>;
+			reg = <0xc0c00000 0x40000>,	// PHY1
+				<0xc0c40000 0x1000>;	// PHY1
+//			reg = <0xc0d00000 0x40000>,	// PHY2
+//				<0xc0d40000 0x1000>;	// PHY2
+			reg-names = "core", "app";
+			resets = <&rcu0 0x60 8>,
+				<&rcu0 0x60 18>,
+				<&rcu0 0x60 25>,
+				<&rcu0 0x60 26>;
+			reset-names = "phy", "core", "iphy0", "iphy1";
+			intel,syscfg = <&sysconf 3>;
+			intel,hsio = <&hsior 1>;
+		};
+
+		pcie30: pcie@d1000000 {
+			status = "disabled";
+			compatible = "intel,lgm-pcie", "snps,dw-pcie";
+			device_type = "pci";
+			#address-cells = <3>;
+			#size-cells = <2>;
+			reg = <0xd1000000 0x1000>,
+				<0xd10c0000 0x1000>,
+				<0xd3000000 0x20000>,
+				<0xd0c41000 0x1000>;
+			reg-names = "dbi", "atu", "config", "app";
+			linux,pci-domain = <2>;
+			max-link-speed = <3>;
+			bus-range = <0x00 0x08>;
+			interrupt-parent = <&ioapic1>;
+			interrupts = <146 1>;
+			interrupt-names = "ir";
+			#interrupt-cells = <1>;
+			interrupt-map-mask = <0 0 0 0x7>;
+			interrupt-map = <0 0 0 1 &ioapic1 216 1>,
+					<0 0 0 2 &ioapic1 217 1>,
+					<0 0 0 3 &ioapic1 218 1>,
+					<0 0 0 4 &ioapic1 219 1>;
+			ranges = <0x02000000 0 0xdc000000 0xdc000000 0 0x02000000>; /* Non-pretechable memory 32bit */
+			resets = <&rcu0 0x50 2>;
+			reset-names =  "core";
+			clocks = <&cgu0 LGM_GCLK_PCIE30>;
+			clock-names = "ctl";
+			phys = <&combophy1 0>;
+			phy-names = "pcie";
+		};
+
+		pcie41: pcie@c1100000 {
+			status = "disabled";
+			compatible = "intel,lgm-pcie", "snps,dw-pcie";
+			device_type = "pci";
+			#address-cells = <3>;
+			#size-cells = <2>;
+			reg = <0xc1100000 0x1000>,
+				<0xc11c0000 0x1000>,
+				<0xc3800000 0x20000>,
+				<0xc0d41000 0x1000>;
+			reg-names = "dbi", "atu", "config", "app";
+			linux,pci-domain = <7>;
+			max-link-speed = <3>;
+			bus-range = <0x00 0x08>;
+			interrupt-parent = <&ioapic1>;
+			interrupts = <149 1>;
+			interrupt-names = "ir";
+			#interrupt-cells = <1>;
+			interrupt-map-mask = <0 0 0 0x7>;
+			interrupt-map = <0 0 0 1 &ioapic1 228 1>,
+					<0 0 0 2 &ioapic1 229 1>,
+					<0 0 0 3 &ioapic1 230 1>,
+					<0 0 0 4 &ioapic1 231 1>;
+			ranges = <0x02000000 0 0xce000000 0xce000000 0 0x02000000>; /* Non-pretechable memory 32bit */
+			resets = <&rcu0 0x60 3>;
+			reset-names = "core";
+			intel,has_bus_iatu;
+			clocks = <&cgu0 LGM_GCLK_PCIE41>;
+			clock-names = "ctl";
+			phys = <&combophy3 1>;
+			phy-names = "pcie";
+		};
+	};
+};
+
+&pinctrl {
+	i2c0_pins: i2c0 {
+		pins =  <12>, /* I2C0_SDA_PMIC */
+			<20>; /* I2C0_SCL_PMIC */
+		function = "I2C0_PMIC";
+		pinmux = <2>,
+			 <2>;
+		groups = "I2C0_PMIC";
+		drive-open-drain = <1>;
+	};
+
+	i2c1_pins: i2c1 {
+		pins =  <21>, /* I2C1_SDA */
+			<22>; /* I2C1_SCL */
+		function = "I2C1";
+		pinmux = <2>,
+			 <2>;
+		groups = "I2C1";
+		drive-open-drain = <1>;
+	};
+
+	i2c2_pins: i2c2 {
+		pins =  <70>, /* I2C2_SDA */
+			<71>; /* I2C2_SCL */
+		function = "I2C2";
+		pinmux = <1>,
+			 <1>;
+		groups = "I2C2";
+		drive-open-drain = <1>;
+	};
+
+	i2c3_pins: i2c3 {
+		pins =  <62>, /* I2C3_SCL */
+			<63>; /* I2C3_SDA */
+		function = "I2C3";
+		pinmux = <1>,
+			 <1>;
+		groups = "I2C3";
+		drive-open-drain = <1>;
+	};
+
+	pci41_clk_req_pins: pci41_clk_req {
+		pins = <90>; /* PCI41_CLK_REQ */
+		function = "PCI41_CLK_REQ";
+		pinmux = <2>;
+		groups = "PCI41_CLK_REQ";
+	};
+
+	uart0_pins: uart0 {
+		pins =  <64>, /* UART0_RX */
+			<65>; /* UART0_TX */
+		function = "UART0";
+		pinmux = <1>,
+			 <1>;
+		groups = "UART0";
+	};
+
+	uart1_pins: uart1 {
+		pins =  <66>, /* UART1_RX */
+			<67>; /* UART1_TX */
+		function = "UART1";
+		pinmux = <1>,
+			 <1>;
+		groups = "UART1";
+	};
+
+	uart2_pins: uart2 {
+		pins =  <68>, /* UART_RX2 */
+			<69>; /* UART_TX2 */
+		function = "UART2";
+		pinmux = <1>,
+			 <1>;
+		groups = "UART2";
+	};
+
+	uart2_hwfc_pins: uart2_hwfc {
+		pins =  <14>,  /* UART2_RTS */
+			<19>;  /* UART2_CTS */
+		function = "UART2";
+		pinmux = <3>,
+			 <3>;
+		groups = "UART2_HWFC";
+	};
+
+	uart2_2_pins: uart2_2 {
+		pins =  <11>, /* UART2_RX */
+			<10>; /* UART2_TX */
+		function = "UART2";
+		pinmux = <3>,
+			 <3>;
+		groups = "UART2_2";
+	};
+
+	uart3_pins: uart3 {
+		pins =  <70>, /* UART3_RX */
+			<71>, /* UART3_TX */
+			<72>, /* UART3_RTS */
+			<73>; /* UART3_CTS */
+		function = "UART3";
+		pinmux = <2>,
+			 <2>,
+			 <2>,
+			 <2>;
+		groups = "UART3";
+	};
+};

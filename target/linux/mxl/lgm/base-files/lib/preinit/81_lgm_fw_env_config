@@ -1,0 +1,33 @@
+#!/bin/sh
+
+fw_env_config() {
+	local fw_env dir uboot uboot_conf dev_name env_size
+
+	fw_env="/etc/fw_env.config"
+	[ -f "$fw_env" ] && return
+
+	[ -d "/sys/class/mmc_host/mmc0" ] || return
+
+	dir='/sys/class/mmc_host/mmc0/mmc0:0001/block/mmcblk0'
+	echo "# Configuration file for fw_(printenv/setenv) utility." > $fw_env
+	echo "# device name   Device offset   Env. size   Flash sector size" >> $fw_env
+	echo "" >> $fw_env
+	for uboot in 'env_a' 'env_b'; do
+		uboot_conf=$(find "$dir"  -type f | xargs grep -l "$uboot")
+		[ -z "$uboot_conf" ] && continue
+		dev_name=$(grep "DEVNAME" "$uboot_conf" | cut -d= -f2)
+		env_size=0
+		[ -b /dev/$dev_name ] && {
+			env_size="$(cat "$dir/$dev_name/size" | cut -d= -f1)"
+			env_size=$(( env_size * 512))
+		}
+		[ ! -b /dev/$dev_name ] || [ $env_size -eq 0 ] && {
+			echo "Error: wrong device $dev_name or env size $env_size" > /dev/console
+			continue;
+		}
+		env_size="$(printf "0x%X" "$env_size" )"
+		echo "/dev/${dev_name}      0x00            $env_size" >> $fw_env
+	done
+}
+
+boot_hook_add preinit_main fw_env_config

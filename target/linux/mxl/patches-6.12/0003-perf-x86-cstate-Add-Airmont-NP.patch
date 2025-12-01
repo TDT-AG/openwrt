@@ -1,0 +1,24 @@
+From: Martin Schiller <ms@dev.tdt.de>
+Date: Fri, 21 Nov 2025 08:45:06 +0100
+Subject: [PATCH] perf/x86/cstate: Add Airmont NP
+
+From the perspective of Intel cstate residency counters, the Airmont NP
+(aka Lightning Mountain) is identical to the Airmont.
+
+Signed-off-by: Martin Schiller <ms@dev.tdt.de>
+---
+ arch/x86/events/intel/cstate.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/x86/events/intel/cstate.c b/arch/x86/events/intel/cstate.c
+index ae4ec16156bb..12a5c8927a01 100644
+--- a/arch/x86/events/intel/cstate.c
++++ b/arch/x86/events/intel/cstate.c
+@@ -598,6 +598,7 @@ static const struct x86_cpu_id intel_cstates_match[] __initconst = {
+ 	X86_MATCH_VFM(INTEL_ATOM_SILVERMONT,	&slm_cstates),
+ 	X86_MATCH_VFM(INTEL_ATOM_SILVERMONT_D,	&slm_cstates),
+ 	X86_MATCH_VFM(INTEL_ATOM_AIRMONT,	&slm_cstates),
++	X86_MATCH_VFM(INTEL_ATOM_AIRMONT_NP,	&slm_cstates),
+ 
+ 	X86_MATCH_VFM(INTEL_BROADWELL,		&snb_cstates),
+ 	X86_MATCH_VFM(INTEL_BROADWELL_D,	&snb_cstates),

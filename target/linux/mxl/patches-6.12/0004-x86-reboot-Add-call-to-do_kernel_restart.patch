@@ -1,0 +1,43 @@
+From: Martin Schiller <ms@dev.tdt.de>
+Date: Fri, 28 Nov 2025 15:31:42 +0100
+Subject: [PATCH] x86/reboot: Add call to do_kernel_restart()
+
+SoC devices like the Intel / MaxLinear Lightning Mountain must be reset
+by the RCU instead of using  "normal" x86 mechanisms like ACPI, BIOS,
+KBD, etc.
+
+Therefore, the RCU driver (reset-intel-gw) registers a restart handler
+which triggers the global reset signal.
+
+Unfortunately, this is of no use as long as the restart chain is not
+processed during reboot on x86 systems.
+
+So we must call do_kernel_restart() when a reboot is performed. This has
+long been common practice for other architectures.
+
+Signed-off-by: Martin Schiller <ms@dev.tdt.de>
+---
+ arch/x86/kernel/reboot.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/arch/x86/kernel/reboot.c b/arch/x86/kernel/reboot.c
+index 9aaac1f9f45b..2dec95e841cc 100644
+--- a/arch/x86/kernel/reboot.c
++++ b/arch/x86/kernel/reboot.c
+@@ -772,12 +772,15 @@ static void __machine_emergency_restart(int emergency)
+ 	machine_ops.emergency_restart();
+ }
+ 
+-static void native_machine_restart(char *__unused)
++static void native_machine_restart(char *command)
+ {
+ 	pr_notice("machine restart\n");
+ 
+ 	if (!reboot_force)
+ 		machine_shutdown();
++
++	do_kernel_restart(command);
++
+ 	__machine_emergency_restart(0);
+ }
+ 

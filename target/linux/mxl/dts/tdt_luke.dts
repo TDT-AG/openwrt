@@ -1,0 +1,320 @@
+// SPDX-License-Identifier: GPL-2.0
+/*
+ * Copyright (C) 2024-2026 TDT AG <development@tdt.de>
+ */
+
+
+/dts-v1/;
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/leds/common.h>
+
+#include "lightning_mountain.dtsi"
+
+/ {
+	model = "NG2000";
+	compatible = "tdt,luke", "intel,lgm";
+
+	chosen {
+		stdout-path = "serial0";
+	};
+
+	gpio_export: gpio-export {
+		compatible = "gpio-export";
+		#size-cells = <0>;
+
+		/* GPIO08: EEPROM_WP */
+		eeprom_wp_o {
+			gpio-export,name = "eeprom_wp_o";
+			gpio-export,output = <1>;
+			gpios = <&gpio0 8 (GPIO_ACTIVE_HIGH|GPIO_OPEN_DRAIN)>;
+		};
+
+		/* GPIO10: LED_RST_N */
+		led_rst_o {
+			gpio-export,name = "led_rst_o";
+			gpio-export,output = <1>;
+			gpios = <&gpio0 10 (GPIO_ACTIVE_LOW|GPIO_OPEN_DRAIN)>;
+		};
+		/* GPIO15: PERST_WWAN_N */
+		rm_rst_o {
+			gpio-export,name = "rm_rst_o";
+			gpio-export,output = <1>;
+			gpios = <&gpio0 15 (GPIO_ACTIVE_LOW|GPIO_OPEN_DRAIN)>;
+		};
+		/* GPIO23: P3V3_WWAN_EN */
+		rm_pwr_o {
+			gpio-export,name = "rm_pwr_o";
+			gpio-export,output = <1>;
+			gpios = <&gpio0 23 GPIO_ACTIVE_HIGH>;
+		};
+		/* GPIO24: P3V3_WLAN_EN */
+		wifi_pwr_o {
+			gpio-export,name = "wifi_pwr_o";
+			gpio-export,output = <1>;
+			gpios = <&gpio0 24 GPIO_ACTIVE_HIGH>;
+		};
+		/* GPIO27: WWAN_CONFIG0 */
+		rm_config0_i {
+			gpio-export,name = "rm_config0_i";
+			gpios = <&gpio0 27 GPIO_ACTIVE_HIGH>;
+		};
+		/* GPIO28: WWAN_CONFIG1 */
+		rm_config1_i {
+			gpio-export,name = "rm_config1_i";
+			gpios = <&gpio0 28 GPIO_ACTIVE_HIGH>;
+		};
+		/* GPIO29: WWAN_CONFIG2 */
+		rm_config2_i {
+			gpio-export,name = "rm_config2_i";
+			gpios = <&gpio0 29 GPIO_ACTIVE_HIGH>;
+		};
+		/* GPIO30: WWAN_CONFIG3 */
+		rm_config3_i {
+			gpio-export,name = "rm_config3_i";
+			gpios = <&gpio0 30 GPIO_ACTIVE_HIGH>;
+		};
+		/* GPIO31: FCPO_WWAN_N */
+		rm_fcpo_o {
+			gpio-export,name = "rm_fcpo_o";
+			gpio-export,output = <1>;
+			gpios = <&gpio0 31 (GPIO_ACTIVE_LOW|GPIO_OPEN_DRAIN)>;
+		};
+		/* GPIO32: DIS1_WWAN_N */
+		rm_dis1_o {
+			gpio-export,name = "rm_dis1_o";
+			gpio-export,output = <1>;
+			gpios = <&gpio1 0 (GPIO_ACTIVE_LOW|GPIO_OPEN_DRAIN)>;
+		};
+		/* GPIO33: DIS2_WWAN_N */
+		rm_dis2_o {
+			gpio-export,name = "rm_dis2_o";
+			gpio-export,output = <1>;
+			gpios = <&gpio1 1 (GPIO_ACTIVE_LOW|GPIO_OPEN_DRAIN)>;
+		};
+		/* GPIO34: SIM_DETECT */
+		rm_sim_i {
+			gpio-export,name = "rm_sim_i";
+			gpios = <&gpio1 2 GPIO_ACTIVE_HIGH>;
+		};
+		/* GPIO35: WLAN_PRESENT_N */
+		wifi_present_i {
+			gpio-export,name = "wifi_present_i";
+			gpios = <&gpio1 3 GPIO_ACTIVE_LOW>;
+		};
+		/* GPIO36: DIS1_WLAN_N */
+		wifi_dis1_o {
+			gpio-export,name = "wifi_dis1_o";
+			gpio-export,output = <1>;
+			gpios = <&gpio1 4 (GPIO_ACTIVE_LOW|GPIO_OPEN_DRAIN)>;
+		};
+		/* GPIO37: DIS2_WLAN_N */
+		wifi_dis2_o {
+			gpio-export,name = "wifi_dis2_o";
+			gpio-export,output = <1>;
+			gpios = <&gpio1 5 (GPIO_ACTIVE_LOW|GPIO_OPEN_DRAIN)>;
+		};
+		/* GPIO38: THERM_WARN_N */
+		therm_warn_i {
+			gpio-export,name = "therm_warn_i";
+			gpios = <&gpio1 6 GPIO_ACTIVE_LOW>;
+		};
+		/* GPIO39: DG_ALERT_N */
+		dg_alert_i {
+			gpio-export,name = "dg_alert_i";
+			gpios = <&gpio1 7 GPIO_ACTIVE_LOW>;
+		};
+		/* GPIO40: THERM_FAULT_N */
+		therm_fault_i {
+			gpio-export,name = "therm_fault_i";
+			gpios = <&gpio1 8 GPIO_ACTIVE_LOW>;
+		};
+	};
+
+	keys {
+		compatible = "gpio-keys-polled";
+		poll-interval = <100>;
+
+		reset {
+			label = "reset";
+			gpios = <&gpio2 4 GPIO_ACTIVE_LOW>;
+			linux,code = <KEY_RESTART>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		_xdsl_green {
+			label = "_xdsl_green";
+			gpios = <&gpio3 4 GPIO_ACTIVE_HIGH>;
+		};
+		_xdsl_yellow {
+			label = "_xdsl_yellow";
+			gpios = <&gpio3 5 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+};
+
+/* combo PHY setting */
+/* combo phy 0 */
+&combophy0 {
+	status = "okay";
+	intel,phy-mode = <PHY_TYPE_XPCS>;
+};
+
+/* combo phy 1 */
+&combophy1 {
+	status = "okay";
+	intel,phy-mode = <PHY_TYPE_PCIE>;
+};
+
+/* combo phy 3 */
+&combophy3 {
+	status = "okay";
+	intel,phy-mode = <PHY_TYPE_PCIE>;
+};
+
+/* EMMC setting */
+&emmc {
+	status = "okay";
+	bus-width = <8>;
+	non-removable;
+	/* set fixed drive impedance: 0 = 50 Ohms, 1 = 33 Ohms, 2 = 66 Ohms, 3 = 100 Ohms, 4 = 40 Ohms */
+	fixed-emmc-driver-type = <4>;
+	/* set itap delay to 0 to use "auto-tuning" */
+	clk-phase-mmc-hs200 = <0>, <180>;
+	clk-phase-mmc-hs400 = <0>, <90>;
+};
+
+&emmc_phy {
+	status = "okay";
+	drive-impedance-ohm = <40>;
+};
+
+&i2c1 {
+	status = "okay";
+
+	sensor@4c {
+		compatible = "nxp,sa56004";
+		reg = <0x4c>;
+	};
+
+	eeprom@50 {
+		compatible = "at,24c04";
+		reg = <0x50>;
+
+		nvmem-layout {
+			compatible = "onie,tlv-layout";
+		};
+	};
+
+	rtc@68 {
+		compatible = "dallas,ds1308";
+		reg = <0x68>;
+	};
+};
+
+&i2c3 {
+	status = "okay";
+
+	ina220@45 {
+		compatible = "ti,ina220";
+		reg = <0x45>;
+		shunt-resistor = <20000>;
+	};
+
+	ktd2061@68 {
+		#address-cells = <1>;
+		#size-cells = <0>;
+		compatible = "kinetic,ktd20xx";
+		reg = <0x68>;
+		led-0 {
+			reg = <0xA>; //LEDC3
+			function = LED_FUNCTION_STATUS;
+			color = <LED_COLOR_ID_MULTI>;
+			linux,default-trigger = "none";
+		};
+		led-1 {
+			reg = <0x9>; //LEDC2
+			function = LED_FUNCTION_LAN;
+			color = <LED_COLOR_ID_MULTI>;
+			linux,default-trigger = "none";
+		};
+		led-2 {
+			reg = <0x8>; //LEDC1
+			function = LED_FUNCTION_WLAN;
+			color = <LED_COLOR_ID_MULTI>;
+			linux,default-trigger = "none";
+		};
+		led-3 {
+			reg = <0x7>; //LEDB4
+			function = "vpn";
+			color = <LED_COLOR_ID_MULTI>;
+			linux,default-trigger = "none";
+		};
+		led-4 {
+			reg = <0x6>; //LEDB3
+			function = LED_FUNCTION_WAN;
+			color = <LED_COLOR_ID_MULTI>;
+			linux,default-trigger = "none";
+		};
+		led-5 {
+			reg = <0x5>; //LEDB2
+			function = "external";
+			color = <LED_COLOR_ID_MULTI>;
+			linux,default-trigger = "none";
+		};
+		led-6 {
+			reg = <0x4>; //LEDB1
+			function = "dsl";
+			color = <LED_COLOR_ID_MULTI>;
+			linux,default-trigger = "none";
+		};
+		led-7 {
+			reg = <0x3>; //LEDA4
+			function = "wwan";
+			color = <LED_COLOR_ID_MULTI>;
+			linux,default-trigger = "none";
+		};
+		led-8 {
+			reg = <0x2>; //LEDA3
+			function = "cellular";
+			color = <LED_COLOR_ID_MULTI>;
+			linux,default-trigger = "none";
+		};
+		led-9 {
+			reg = <0x1>; //LEDA2
+			function = "signal";
+			color = <LED_COLOR_ID_MULTI>;
+			linux,default-trigger = "none";
+		};
+	};
+};
+
+/* PCIe */
+&pcie30 { /* DSL */
+	status = "okay";
+	reset-assert-ms = <200>;
+	reset-gpios = <&gpio0 17 (GPIO_ACTIVE_LOW|GPIO_OPEN_DRAIN)>;
+	num-lanes = <1>;
+};
+
+&pcie41 { /* WIFI */
+	status = "okay";
+	/* CLKREQ# feature temporarily disabled as it is currently not working properly */
+	// pinctrl-names = "default";
+	// pinctrl-0 = <&pci41_clk_req_pins>;
+	reset-assert-ms = <200>;
+	reset-gpios = <&gpio0 16 (GPIO_ACTIVE_LOW|GPIO_OPEN_DRAIN)>;
+	num-lanes = <1>;
+};
+
+&usb1_phy {
+	status = "okay";
+};
+
+&usb1 {
+	status = "okay";
+};
