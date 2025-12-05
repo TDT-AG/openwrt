@@ -1882,6 +1882,7 @@ define KernelPackage/usb3
 	+kmod-usb-xhci-hcd \
 	+TARGET_bcm53xx:kmod-usb-bcma \
 	+TARGET_bcm53xx:kmod-phy-bcm-ns-usb3 \
+	+TARGET_mxl_lgm:kmod-phy-lgm-usb \
 	+TARGET_ramips_mt7621:kmod-usb-xhci-mtk \
 	+TARGET_econet_en751221:kmod-usb-xhci-mtk \
 	+TARGET_mediatek:kmod-usb-xhci-mtk
