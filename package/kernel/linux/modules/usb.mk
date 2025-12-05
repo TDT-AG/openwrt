@@ -530,7 +530,8 @@ $(eval $(call KernelPackage,usb-cdns3))
 define KernelPackage/usb-dwc3
   SUBMENU:=$(USB_MENU)
   TITLE:=DWC3 USB controller driver
-  DEPENDS:=+USB_GADGET_SUPPORT:kmod-usb-gadget \
+  DEPENDS:=+kmod-usb3 \
+	   +USB_GADGET_SUPPORT:kmod-usb-gadget \
 	   +USB_SUPPORT:kmod-usb-core \
 	   +kmod-usb-roles
   KCONFIG:= \
