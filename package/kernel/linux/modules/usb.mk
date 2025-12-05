@@ -561,6 +561,25 @@ endef
 $(eval $(call KernelPackage,usb-dwc3))
 
 
+define KernelPackage/usb-dwc3-of-simple
+  TITLE:=DWC3 OF Simple USB driver
+  DEPENDS:=@TARGET_mxl_lgm +kmod-usb-dwc3
+  KCONFIG:= CONFIG_USB_DWC3_OF_SIMPLE
+  FILES:= $(LINUX_DIR)/drivers/usb/dwc3/dwc3-of-simple.ko
+  AUTOLOAD:=$(call AutoProbe,dwc3-of-simple,1)
+  $(call AddDepends/usb)
+endef
+
+define KernelPackage/usb-dwc3-of-simple/description
+  Support USB2/3 functionality in simple SoC integrations.
+  Currently supports Rockchip RK3399, Spreadtrum SC9860, Allwinner H6,
+  HiSilicon Hi3670, Hi3798MV200, Intel Keem Bay and Intel / MaxLinear
+  Lightning Mountain (LGM) DWC USB3 IP.
+endef
+
+$(eval $(call KernelPackage,usb-dwc3-of-simple))
+
+
 define KernelPackage/usb-dwc3-octeon
   TITLE:=DWC3 Cavium Octeon USB driver
   DEPENDS:=@TARGET_octeon +kmod-usb-dwc3
