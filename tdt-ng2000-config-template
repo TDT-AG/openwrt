@@ -1,0 +1,11 @@
+CONFIG_TARGET_mxl=y
+CONFIG_TARGET_mxl_lgm=y
+CONFIG_TARGET_ROOTFS_INITRAMFS=y
+
+CONFIG_PACKAGE_pciutils=y
+CONFIG_PACKAGE_usbutils=y
+
+CONFIG_PACKAGE_umbim=y
+CONFIG_PACKAGE_uqmi=y
+CONFIG_PACKAGE_kmod-usb-serial-option=y
+CONFIG_PACKAGE_minicom=y
