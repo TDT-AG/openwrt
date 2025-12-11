@@ -1,0 +1,84 @@
+From 2c3857bfb8aee07c1c0591d7d1a61bd2b7f3c2b9 Mon Sep 17 00:00:00 2001
+From: Martin Schiller <ms@dev.tdt.de>
+Date: Mon, 1 Dec 2025 10:29:35 +0100
+Subject: [PATCH] intel_idle: Add Lightning Mountain support
+
+TBD
+
+Signed-off-by: Martin Schiller <ms@dev.tdt.de>
+---
+ drivers/idle/intel_idle.c | 44 +++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 44 insertions(+)
+
+diff --git a/drivers/idle/intel_idle.c b/drivers/idle/intel_idle.c
+index 4506e1cc4b65..e77e84176a5b 100644
+--- a/drivers/idle/intel_idle.c
++++ b/drivers/idle/intel_idle.c
+@@ -360,6 +360,43 @@ static struct cpuidle_state byt_cstates[] __initdata = {
+ 		.enter = NULL }
+ };
+ 
++static struct cpuidle_state lgm_cstates[] __initdata = {
++	{
++		.name = "C1",
++		.desc = "MWAIT 0x00",
++		.flags = MWAIT2flg(0x00),
++		.exit_latency = 1,
++		.target_residency = 4,
++		.enter = &intel_idle,
++		.enter_s2idle = intel_idle_s2idle, },
++	{
++		.name = "C6NS",
++		.desc = "MWAIT 0x58",
++		.flags = MWAIT2flg(0x58) | CPUIDLE_FLAG_TLB_FLUSHED,
++		.exit_latency = 50,
++		.target_residency = 200,
++		.enter = &intel_idle,
++		.enter_s2idle = intel_idle_s2idle, },
++	{
++		.name = "C6FS",
++		.desc = "MWAIT 0x52",
++		.flags = MWAIT2flg(0x52) | CPUIDLE_FLAG_TLB_FLUSHED,
++		.exit_latency = 100,
++		.target_residency = 500,
++		.enter = &intel_idle,
++		.enter_s2idle = intel_idle_s2idle, },
++	{
++		.name = "C7",
++		.desc = "MWAIT 0x52",
++		.flags = MWAIT2flg(0x52) | CPUIDLE_FLAG_TLB_FLUSHED,
++		.exit_latency = 500,
++		.target_residency = 2000,
++		.enter = &intel_idle,
++		.enter_s2idle = intel_idle_s2idle, },
++	{
++		.enter = NULL }
++};
++
+ static struct cpuidle_state cht_cstates[] __initdata = {
+ 	{
+ 		.name = "C1",
+@@ -1425,6 +1462,12 @@ static const struct idle_cpu idle_cpu_byt __initconst = {
+ 	.byt_auto_demotion_disable_flag = true,
+ };
+ 
++static const struct idle_cpu idle_cpu_lgm __initconst = {
++	.state_table = lgm_cstates,
++	.disable_promotion_to_c1e = true,
++	.byt_auto_demotion_disable_flag = true,
++};
++
+ static const struct idle_cpu idle_cpu_cht __initconst = {
+ 	.state_table = cht_cstates,
+ 	.disable_promotion_to_c1e = true,
+@@ -1569,6 +1612,7 @@ static const struct x86_cpu_id intel_idle_ids[] __initconst = {
+ 	X86_MATCH_VFM(INTEL_ATOM_SILVERMONT,	&idle_cpu_byt),
+ 	X86_MATCH_VFM(INTEL_ATOM_SILVERMONT_MID, &idle_cpu_tangier),
+ 	X86_MATCH_VFM(INTEL_ATOM_AIRMONT,	&idle_cpu_cht),
++	X86_MATCH_VFM(INTEL_ATOM_AIRMONT_NP,	&idle_cpu_lgm),
+ 	X86_MATCH_VFM(INTEL_IVYBRIDGE,		&idle_cpu_ivb),
+ 	X86_MATCH_VFM(INTEL_IVYBRIDGE_X,	&idle_cpu_ivt),
+ 	X86_MATCH_VFM(INTEL_HASWELL,		&idle_cpu_hsw),
+-- 
+2.47.3
+

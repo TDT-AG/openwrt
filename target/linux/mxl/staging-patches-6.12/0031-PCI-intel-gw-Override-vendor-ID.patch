@@ -1,0 +1,49 @@
+From: Florian Eckert <fe@dev.tdt.de>
+Date: Fri, 19 Dec 2025 10:12:51 +0100
+Subject: [PATCH] PCI: intel-gw: Override vendor ID
+
+Signed-off-by: Florian Eckert <fe@dev.tdt.de>
+---
+ drivers/pci/controller/dwc/pcie-intel-gw.c | 15 +++++++++++++++
+ 1 file changed, 15 insertions(+)
+
+diff --git a/drivers/pci/controller/dwc/pcie-intel-gw.c b/drivers/pci/controller/dwc/pcie-intel-gw.c
+index 3ef198381b96..4e205fd9c59c 100644
+--- a/drivers/pci/controller/dwc/pcie-intel-gw.c
++++ b/drivers/pci/controller/dwc/pcie-intel-gw.c
+@@ -23,6 +23,9 @@
+ #define PORT_AFR_N_FTS_GEN3		180
+ #define PORT_AFR_N_FTS_GEN4		196
+ 
++/* PCIe RC Configuration Register */
++#define PCIE_RC_VDID 0x00
++
+ /* PCIe Application logic Registers */
+ #define PCIE_APP_CCR			0x10
+ #define PCIE_APP_CCR_LTSSM_ENABLE	BIT(0)
+@@ -222,6 +225,15 @@ static void intel_pcie_core_irq_disable(struct intel_pcie *pcie)
+ 	pcie_app_wr(pcie, PCIE_APP_IRNCR, PCIE_APP_IRN_INT);
+ }
+ 
++static void intel_pcie_vendor_id_overwrite(struct intel_pcie *pcie)
++{
++	pcie_rc_cfg_wr_mask(pcie, PCIE_MISC_CONTROL_1_OFF, PCIE_DBI_RO_WR_EN,
++			    PCIE_DBI_RO_WR_EN);
++	pcie_rc_cfg_wr(pcie, PCIE_RC_VDID, 0x008017e6);
++	pcie_rc_cfg_wr_mask(pcie, PCIE_MISC_CONTROL_1_OFF, PCIE_DBI_RO_WR_EN,
++			    0);
++}
++
+ static int intel_pcie_get_resources(struct platform_device *pdev)
+ {
+ 	struct intel_pcie *pcie = platform_get_drvdata(pdev);
+@@ -338,6 +350,9 @@ static int intel_pcie_host_setup(struct intel_pcie *pcie)
+ 	if (ret)
+ 		goto phy_err;
+ 
++	/* Overwrite pcie vendor ID so MxL DSL is happy */
++	intel_pcie_vendor_id_overwrite(pcie);
++
+ 	intel_pcie_ltssm_disable(pcie);
+ 	intel_pcie_link_setup(pcie);
+ 	intel_pcie_init_n_fts(pci);
