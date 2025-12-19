@@ -1,0 +1,53 @@
+From: Martin Schiller <ms@dev.tdt.de>
+Date: Fri, 19 Dec 2025 10:38:07 +0100
+Subject: [PATCH] PCI: intel-gw: introduce intel,has_bus_iatu parameter
+
+This patch is still WiP. The intel_pcie_cpu_addr() is alread removed
+upstream in [1]. We need to find out, how we other target work now
+without the .cpu_addr_fixup() hook.
+
+[1] https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/commit/drivers/pci/controller/dwc/pcie-intel-gw.c?h=next-20251219&id=07ae413e169da3697e633dd4489db0d681a04460
+
+Signed-off-by: Martin Schiller <ms@dev.tdt.de>
+---
+ drivers/pci/controller/dwc/pcie-intel-gw.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/pci/controller/dwc/pcie-intel-gw.c b/drivers/pci/controller/dwc/pcie-intel-gw.c
+index fe919d6bb264..3ef198381b96 100644
+--- a/drivers/pci/controller/dwc/pcie-intel-gw.c
++++ b/drivers/pci/controller/dwc/pcie-intel-gw.c
+@@ -77,6 +77,7 @@ struct intel_pcie {
+ 	struct clk		*core_clk;
+ 	struct reset_control	*core_rst;
+ 	struct phy		*phy;
++	bool			has_bus_iatu;
+ 	char			irq_name[16];
+ 	int			id;
+ };
+@@ -249,6 +250,8 @@ static int intel_pcie_get_resources(struct platform_device *pdev)
+ 	if (ret)
+ 		pcie->rst_intrvl = RESET_INTERVAL_MS;
+ 
++	pcie->has_bus_iatu = device_property_read_bool(dev, "intel,has_bus_iatu");
++
+ 	pcie->app_base = devm_platform_ioremap_resource_byname(pdev, "app");
+ 	if (IS_ERR(pcie->app_base))
+ 		return PTR_ERR(pcie->app_base);
+@@ -485,9 +488,14 @@ static int intel_pcie_msi_init(struct dw_pcie_rp *pp)
+ 	return 0;
+ }
+ 
+-static u64 intel_pcie_cpu_addr(struct dw_pcie *pcie, u64 cpu_addr)
++static u64 intel_pcie_cpu_addr(struct dw_pcie *pci, u64 cpu_addr)
+ {
+-	return cpu_addr + BUS_IATU_OFFSET;
++	struct intel_pcie *pcie = dev_get_drvdata(pci->dev);
++
++	if (pcie->has_bus_iatu)
++		return cpu_addr + BUS_IATU_OFFSET;
++
++	return cpu_addr;
+ }
+ 
+ static const struct dw_pcie_ops intel_pcie_ops = {

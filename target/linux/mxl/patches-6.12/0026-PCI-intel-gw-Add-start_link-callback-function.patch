@@ -1,0 +1,64 @@
+From: Florian Eckert <fe@dev.tdt.de>
+Date: Fri, 19 Dec 2025 10:12:38 +0100
+Subject: [PATCH] PCI: intel-gw: Add start_link callback function
+
+As explained in commit c5097b986 ("Revert: "PCI: dwc: Wait for link up
+only if link is started"") the pcie-intel-gw driver has no start_link
+callback function. This commit adds the missing callback function so that
+the driver works again and does not abort with an error during probing.
+
+Signed-off-by: Florian Eckert <fe@dev.tdt.de>
+---
+ drivers/pci/controller/dwc/pcie-intel-gw.c | 23 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/pci/controller/dwc/pcie-intel-gw.c b/drivers/pci/controller/dwc/pcie-intel-gw.c
+index 74d890fdf5c7..b05931cc5395 100644
+--- a/drivers/pci/controller/dwc/pcie-intel-gw.c
++++ b/drivers/pci/controller/dwc/pcie-intel-gw.c
+@@ -286,6 +286,16 @@ static void intel_pcie_turn_off(struct intel_pcie *pcie)
+ 	pcie_rc_cfg_wr_mask(pcie, PCI_COMMAND, PCI_COMMAND_MEMORY, 0);
+ }
+ 
++static int intel_pcie_start_link(struct dw_pcie *pci)
++{
++	struct intel_pcie *pcie = dev_get_drvdata(pci->dev);
++
++	intel_pcie_device_rst_deassert(pcie);
++	intel_pcie_ltssm_enable(pcie);
++
++	return 0;
++}
++
+ static int intel_pcie_host_setup(struct intel_pcie *pcie)
+ {
+ 	int ret;
+@@ -311,20 +321,8 @@ static int intel_pcie_host_setup(struct intel_pcie *pcie)
+ 	intel_pcie_ltssm_disable(pcie);
+ 	intel_pcie_link_setup(pcie);
+ 	intel_pcie_init_n_fts(pci);
+-
+-	ret = dw_pcie_setup_rc(&pci->pp);
+-	if (ret)
+-		goto phy_err;
+-
+ 	dw_pcie_upconfig_setup(pci);
+ 
+-	intel_pcie_device_rst_deassert(pcie);
+-	intel_pcie_ltssm_enable(pcie);
+-
+-	ret = dw_pcie_wait_for_link(pci);
+-	if (ret)
+-		goto phy_err;
+-
+ 	intel_pcie_core_irq_enable(pcie);
+ 
+ 	return 0;
+@@ -393,6 +391,7 @@ static u64 intel_pcie_cpu_addr(struct dw_pcie *pcie, u64 cpu_addr)
+ 
+ static const struct dw_pcie_ops intel_pcie_ops = {
+ 	.cpu_addr_fixup = intel_pcie_cpu_addr,
++	.start_link = intel_pcie_start_link,
+ };
+ 
+ static const struct dw_pcie_host_ops intel_pcie_dw_ops = {
