@@ -464,7 +464,7 @@
 				 <&rcu0 0x50 0x18>;
 			reset-names = "phy", "core", "iphy0", "iphy1";
 			intel,syscfg = <&chiptop 0>;
-			intel,hsio = <&hsio0 0>;
+			intel,hsio = <&hsio1 0>;
 			intel,phy-mode = <PHY_TYPE_PCIE>;
 			#phy-cells = <1>;
 			status = "disabled";
@@ -481,7 +481,7 @@
 				 <&rcu0 0x50 0x1a>;
 			reset-names = "phy", "core", "iphy0", "iphy1";
 			intel,syscfg = <&chiptop 1>;
-			intel,hsio = <&hsio0 1>;
+			intel,hsio = <&hsio1 1>;
 			intel,phy-mode = <PHY_TYPE_PCIE>;
 			#phy-cells = <1>;
 			status = "disabled";
@@ -498,7 +498,7 @@
 				 <&rcu0 0x60 0x18>;
 			reset-names = "phy", "core", "iphy0", "iphy1";
 			intel,syscfg = <&chiptop 2>;
-			intel,hsio = <&hsio1 0>;
+			intel,hsio = <&hsio0 0>;
 			intel,phy-mode = <PHY_TYPE_PCIE>;
 			#phy-cells = <1>;
 			status = "disabled";
@@ -515,7 +515,7 @@
 				 <&rcu0 0x60 0x1a>;
 			reset-names = "phy", "core", "iphy0", "iphy1";
 			intel,syscfg = <&chiptop 3>;
-			intel,hsio = <&hsio1 1>;
+			intel,hsio = <&hsio0 1>;
 			intel,phy-mode = <PHY_TYPE_PCIE>;
 			#phy-cells = <1>;
 			status = "disabled";
