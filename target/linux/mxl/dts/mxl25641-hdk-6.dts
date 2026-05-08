@@ -145,6 +145,14 @@
 };
 
 &emmc {
+	clk-phase-mmc-hs200 = <0 0xb4>;
+	clk-phase-mmc-hs400 = <0 0x5a>;
+	bus-width = <8>;
+	no-mmc-hs400;
+	status = "okay";
+};
+
+&emmc_phy {
 	status = "okay";
 };
 

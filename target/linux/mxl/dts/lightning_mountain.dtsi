@@ -232,11 +232,7 @@
 			phys = <&emmc_phy>;
 			phy-names = "phy_arasan";
 			dma-coherent;
-			clk-phase-mmc-hs200 = <0 0xb4>;
-			clk-phase-mmc-hs400 = <0 0x5a>;
-			bus-width = <8>;
 			non-removable;
-			no-mmc-hs400;
 			status = "disabled";
 		};
 
@@ -264,6 +260,7 @@
 			clocks = <&emmc 0>;
 			clock-names = "emmcclk";
 			#phy-cells = <0>;
+			status = "disabled";
 		};
 
 		/*
