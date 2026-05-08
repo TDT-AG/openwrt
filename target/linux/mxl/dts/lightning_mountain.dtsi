@@ -272,8 +272,8 @@
 			reg = <0xe1300000 0x100>;
 			interrupt-parent = <&ioapic1>;
 			interrupts = <73 1>;
-			clocks = <&cgu0 LGM_CLK_NOC4>;
-			clock-names = "ref";
+			clocks =  <&cgu0 LGM_CLK_NOC4>, <&cgu0 LGM_GCLK_I2C1>;
+			clock-names = "ic_clk", "pclk";
 			clock-frequency = <100000>;
 			i2c-sda-hold-time-ns = <500>;
 			resets = <&rcu0 0x30 0x09>;
@@ -287,8 +287,8 @@
 			reg = <0xe1f00000 0x100>;
 			interrupt-parent = <&ioapic1>;
 			interrupts = <74 1>;
-			clocks = <&cgu0 LGM_CLK_NOC4>;
-			clock-names = "ref";
+			clocks =  <&cgu0 LGM_CLK_NOC4>, <&cgu0 LGM_GCLK_I2C2>;
+			clock-names = "ic_clk", "pclk";
 			clock-frequency = <100000>;
 			i2c-sda-hold-time-ns = <500>;
 			resets = <&rcu0 0x30 0x0a>;
@@ -302,8 +302,8 @@
 			reg = <0xe2000000 0x100>;
 			interrupt-parent = <&ioapic1>;
 			interrupts = <75 1>;
-			clocks = <&cgu0 LGM_CLK_NOC4>;
-			clock-names = "ref";
+			clocks =  <&cgu0 LGM_CLK_NOC4>, <&cgu0 LGM_GCLK_I2C3>;
+			clock-names = "ic_clk", "pclk";
 			clock-frequency = <100000>;
 			i2c-sda-hold-time-ns = <500>;
 			resets = <&rcu0 0x30 0x0b>;
