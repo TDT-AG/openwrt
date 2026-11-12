@@ -150,6 +150,38 @@ endef
 
 PKG_INSTALL_STAMP:=$(PKG_INFO_DIR)/$(PKG_DIR_NAME).$(if $(BUILD_VARIANT),$(BUILD_VARIANT),default).install
 
+# Feeds added with src-link are symbolic links which may point outside
+# of TOPDIR. CURDIR always holds the resolved path, so map it back to
+# $(TOPDIR)/feeds/<feed>/... first.
+# Example:
+# Feed link: feeds/packages -> ../../feeds/packages
+# Package: /path/to/feeds/packages/net/frr -> $(TOPDIR)/feeds/packages/net/frr
+
+# All feed directories, the trailing slash skips files and broken links
+__pkg_feed_links:=$(patsubst %/,%,$(sort $(wildcard $(TOPDIR)/feeds/*/)))
+
+# __pkg_feed_inside <feed link>
+# $(1): feed link, e.g. $(TOPDIR)/feeds/packages
+# Return CURDIR if it is inside the feed, otherwise nothing
+__pkg_feed_inside=$(filter $(realpath $(1))/%,$(CURDIR))
+
+# __pkg_feed_map <feed link>
+# $(1): feed link, e.g. $(TOPDIR)/feeds/packages
+# Return CURDIR with the resolved feed path replaced by the feed link
+__pkg_feed_map=$(patsubst $(realpath $(1))/%,$(1)/%,$(call __pkg_feed_inside,$(1)))
+
+# __pkg_feed_find
+# Return CURDIR mapped to the first feed link which contains it
+__pkg_feed_find=$(firstword $(foreach feed,$(__pkg_feed_links),$(call __pkg_feed_map,$(feed))))
+
+# Package directory mapped to its feed link, empty if the package
+# is not part of a feed
+__pkg_feed_curdir:=$(call __pkg_feed_find)
+
+# Package directory with feed links kept. Use CURDIR as is if the
+# package is not part of a feed.
+__pkg_curdir:=$(if $(__pkg_feed_curdir),$(__pkg_feed_curdir),$(CURDIR))
+
 # Normalize package SOURCE entry to pack reproducible package
 # If we are packing a package with OpenWrt buildroot:
 # - Replace package/... with feeds/base/...
@@ -161,12 +193,12 @@ PKG_INSTALL_STAMP:=$(PKG_INFO_DIR)/$(PKG_DIR_NAME).$(if $(BUILD_VARIANT),$(BUILD
 #   Feed link: feeds/base_root/package -> feeds/base
 #   Package: feeds/base_root/package/system/uci -> feeds/base/system/uci
 ifeq ($(DUMP),)
-  __pkg_base_path:=$(patsubst $(TOPDIR)/%,%,$(CURDIR))
+  __pkg_base_path:=$(patsubst $(TOPDIR)/%,%,$(__pkg_curdir))
   __pkg_provider_path:=$(word 1,$(subst /, ,$(__pkg_base_path)))
   ifeq ($(__pkg_provider_path), feeds)
     __pkg_feed_path:=$(word 2,$(subst /, ,$(__pkg_base_path)))
     __pkg_feed_name:=$(patsubst %_root,%,$(__pkg_feed_path))
-    ifneq (__pkg_feed_path, __pkg_feed_name)
+    ifneq ($(__pkg_feed_path),$(__pkg_feed_name))
       __pkg_feed_realpath:=$(realpath $(TOPDIR)/feeds/$(__pkg_feed_name))
       __pkg_feed_dir:=$(patsubst $(TOPDIR)/feeds/$(__pkg_feed_path)/%,%,$(__pkg_feed_realpath))
       __pkg_path:=$(patsubst feeds/$(__pkg_feed_path)/$(__pkg_feed_dir)/%,%,$(__pkg_base_path))
