@@ -1,3 +1,4 @@
+From 480268596fac7f9e4b8e9b544ac5aecff5abca2d Mon Sep 17 00:00:00 2001
 From: George Moussalem <george.moussalem@outlook.com>
 Date: Fri, 30 May 2025 09:12:23 +0400
 Subject: [PATCH] clk: qcom: gcc-ipq5018: fix UNIPHY soft reset issue
