@@ -1,3 +1,4 @@
+From 0547b912e981df32731e8bd6f583a79c1021e181 Mon Sep 17 00:00:00 2001
 From: Felix Fietkau <nbd@nbd.name>
 Date: Sun, 30 Aug 2026 01:44:29 +0200
 Subject: [PATCH] net: ethernet: mtk_eth_soc: query the wireless driver for the

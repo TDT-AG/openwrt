@@ -1,3 +1,5 @@
+From 76d6b7fdbf0bc84bc4c89158faed8fe33beaf1e3 Mon Sep 17 00:00:00 2001
+From: Andrew LaMarche <andrewjlamarche@gmail.com>
 FROM: Andrew LaMarche <andrewjlamarche@gmail.com>
 Date: Sat, 25 Oct 2026 00:00:00 -0400
 Subject: [PATCH] octeon: Fix PEM BAR register map on CN70XX

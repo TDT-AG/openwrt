@@ -1,3 +1,4 @@
+From 0547b912e981df32731e8bd6f583a79c1021e181 Mon Sep 17 00:00:00 2001
 From: Felix Fietkau <nbd@nbd.name>
 Date: Tue, 13 Oct 2026 12:04:02 +0200
 Subject: [PATCH] net: ethernet: mtk_eth_soc: report the idle time of offloaded

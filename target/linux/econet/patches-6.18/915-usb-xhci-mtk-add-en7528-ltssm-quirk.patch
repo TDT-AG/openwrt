@@ -1,4 +1,6 @@
+From 62c1c6a946cc6dcab64b7310e6a55e27b2a1be41 Mon Sep 17 00:00:00 2001
 From: Ahmed Naseef <naseefkm@gmail.com>
+Date: Thu, 19 Mar 2026 15:55:28 +0400
 Subject: usb: xhci-mtk: add EN7528 LTSSM timing quirk
 
 EN7528 needs LTSSM Timing Parameter 5 configured to fix

@@ -1,3 +1,5 @@
+From 65592178ec1105d9794c5807b1a42e4b5667adbf Mon Sep 17 00:00:00 2001
+From: Andrew LaMarche <andrewjlamarche@gmail.com>
 FROM: Andrew LaMarche <andrewjlamarche@gmail.com>
 Date: Wed, 28 Oct 2026 00:00:00 -0400
 Subject: [PATCH] octeon: fix PCIe port reset on Octeon III

@@ -1,3 +1,4 @@
+From f9dd7690520b120a0c3a0ea9cdf8113828bea8d0 Mon Sep 17 00:00:00 2001
 From: Ryan Leung <untilscour@protonmail.com>
 Date: Fri, 17 Apr 2026 13:37:40 +1000
 Subject: [PATCH] arm64: dts: rockchip: add and set buttons for NanoPi M5

@@ -1,3 +1,4 @@
+From 0547b912e981df32731e8bd6f583a79c1021e181 Mon Sep 17 00:00:00 2001
 From: Felix Fietkau <nbd@nbd.name>
 Date: Thu, 15 Oct 2026 12:00:00 +0200
 Subject: [PATCH] wifi: cfg80211: add the flow key and flow description types
